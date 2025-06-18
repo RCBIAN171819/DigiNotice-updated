@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Notice Board - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Mulish', sans-serif;
+            background-color: #DADADA;
+        }
+
+        header {
+            background-color: #1a237e;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            padding: 30px 4%;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            width: calc(50% - 20px);
+            max-width: 550px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #1a237e;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Mulish', sans-serif;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #1a237e;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #757575;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .upload-container {
+            border: 2px dashed #1a237e;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .upload-container.dragover {
+            background-color: rgba(26, 35, 126, 0.1);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            margin-bottom: 5px;
+            color: #1a237e;
+        }
+
+        .upload-formats {
+            font-size: 12px;
+            color: #757575;
+        }
+
+        .upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .text-area {
+            width: 100%;
+            min-height: 150px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Mulish', sans-serif;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            background-color: #1a237e;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            position: relative;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .card {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1 class="header-title">DIGITAL NOTICE BOARD</h1>
+        <p>Dashboard</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Notice Board Preview</h2>
+            <iframe id="preview-frame" class="preview-frame" src="/display.html" frameborder="0"></iframe>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Currently Displayed Content</h2>
+            <div id="file-list" class="file-list">
+                <!-- Files will be populated here -->
+                <div class="file-item">
+                    <div>Loading content...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Upload Images & Videos</h2>
+            <div id="upload-container" class="upload-container">
+                <img class="upload-icon" src="https://cdn-icons-png.flaticon.com/512/2989/2989981.png" alt="Upload">
+                <p class="upload-text">Drag & drop files or <span style="color: blue; text-decoration: underline;">click to browse</span></p>
+                <p class="upload-formats">Supported formats: JPEG, PNG, GIF, MP4</p>
+                <input type="file" id="file-upload" class="upload-input" accept="image/jpeg,image/png,image/gif,video/mp4" multiple>
+            </div>
+            <button id="upload-files-btn" class="btn btn-primary" style="width: 100%;">Upload Files</button>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Add Text Announcement</h2>
+            <textarea id="text-announcement" class="text-area" placeholder="Enter your announcement text here..."></textarea>
+            <div style="display: flex; gap: 10px;">
+                <input type="color" id="text-color" value="#000000" title="Choose text color">
+                <select id="text-size" title="Choose text size">
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                </select>
+                <input type="number" id="display-duration" min="5" value="30" style="width: 100px;" title="Display duration in seconds">
+                <span style="line-height: 32px;">seconds</span>
+            </div>
+            <button id="add-text-btn" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Add Text</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>Digital Notice Board System © 2025</p>
+    </footer>
+
+    <script src="/frontend.js"></script>
+</body>
+
+</html>

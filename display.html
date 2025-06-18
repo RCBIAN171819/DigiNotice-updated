@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Notice Board - Display</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .content-container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .media-content {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .text-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+
+        .text-only {
+            font-size: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #1a237e;
+            padding: 10px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            font-size: 24px;
+        }
+
+        /* Text size classes */
+        .small-text {
+            font-size: 24px;
+        }
+        
+        .medium-text {
+            font-size: 36px;
+        }
+        
+        .large-text {
+            font-size: 48px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>DIGITAL NOTICE BOARD</h1>
+    </div>
+    
+    <div id="content-container" class="content-container">
+        <div class="loading">Loading content...</div>
+    </div>
+
+    <script>
+        // This will be a simple client-side script to fetch and display content
+        document.addEventListener('DOMContentLoaded', function() {
+            let contentContainer = document.getElementById('content-container');
+            let currentIndex = 0;
+            let contentItems = [];
+            
+            // Function to fetch content from the server
+            function fetchContent() {
+                fetch('/api/content')
+                    .then(response => response.json())
+                    .then(data => {
+                        contentItems = data;
+                        if (contentItems.length > 0) {
+                            showContent();
+                            setInterval(showNextContent, 10000); // Change content every 10 seconds by default
+                        } else {
+                            contentContainer.innerHTML = '<div class="text-only">No content available</div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching content:', error);
+                        contentContainer.innerHTML = '<div class="text-only">Error loading content</div>';
+                    });
+            }
+            
+            // Function to display the current content
+            function showContent() {
+                if (contentItems.length === 0) return;
+                
+                const item = contentItems[currentIndex];
+                if (!item) {
+                    console.error('No content item found at index:', currentIndex);
+                    return;
+                }
+                let duration = item.duration || 10; // Default 10 seconds
+                
+                contentContainer.innerHTML = '';
+                
+                if (item.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = item.url;
+                    img.className = 'media-content';
+                    contentContainer.appendChild(img);
+                } else if (item.type === 'video') {
+                    const video = document.createElement('video');
+                    video.src = item.url;
+                    video.className = 'media-content';
+                    video.autoplay = true;
+                    video.muted = true;
+                    video.loop = false;
+                    video.onloadedmetadata = () => {
+                        duration = Math.ceil(video.duration);
+                    };
+                    contentContainer.appendChild(video);
+                } else if (item.type === 'text') {
+                    const textDiv = document.createElement('div');
+                    textDiv.className = `text-only ${item.size || 'medium-text'}`;
+                    textDiv.style.color = item.color || '#FFFFFF';
+                    textDiv.textContent = item.content;
+                    contentContainer.appendChild(textDiv);
+                }
+                
+                // Set timer for next content based on content duration
+                setTimeout(showNextContent, duration * 1000);
+            }
+            
+            // Function to show the next content item
+            function showNextContent() {
+                currentIndex = (currentIndex + 1) % contentItems.length;
+                showContent();
+            }
+            
+            // Initial fetch of content
+            fetchContent();
+            
+            // Set up WebSocket for real-time updates (optional addition)
+            const socket = new WebSocket(`ws://${window.location.host}/ws`);
+            socket.onmessage = function(event) {
+                const message = JSON.parse(event.data);
+                if (message.type === 'content-updated') {
+                    fetchContent(); // Refresh content when updated
+                }
+            };
+        });
+    </script>
+</body>
+
+</html>
